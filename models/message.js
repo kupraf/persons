@@ -10,11 +10,13 @@ var messageSchema = new Schema({
     type:String,required:true
   },
 
-  vu: {
+  seen: {
     type:Boolean ,default: false,required:false
   },
   Date_msg: {
-    type:Date, default : Date.now
+    type: String,
+    require: Date,
+    default:Date.now()
   },
   sender: {
     type: Schema.Types.ObjectId,ref: "user"

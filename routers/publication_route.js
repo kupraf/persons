@@ -11,10 +11,11 @@ const async = require('async');
 // Post new publication
 router.post("/", function(req, res){
 	let new_publication = new publication({
-    Contenue:req.body.Contenue,
-    date_pub:req.body.date_pub,
-    owner:req.body.owner,
-    like:req.body.like
+	content:req.body.content,
+	user:req.body.user,
+	likes:req.body.likes,
+	photos:req.body.photos,
+	created:Date.now()
 	})
 	new_publication.save(function(err, publication){
 		if (err) {

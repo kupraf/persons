@@ -11,10 +11,10 @@ const async = require('async');
 // Post new commentaire
 router.post("/", function(req, res){
 	let new_commentaire = new commentaire({
-    Contenue:req.body.Contenue,
-    date_com:req.body.date_com,
-    owner:req.body.owner,
-    pub:req.body.pub
+		user:req.body.user,
+		post:req.body.post,
+		content:req.body.content,
+		created:Date.now()
 	})
 	new_commentaire.save(function(err, commentaire){
 		if (err) {

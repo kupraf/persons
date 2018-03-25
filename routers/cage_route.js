@@ -7,11 +7,12 @@ const async = require('async');
 // Post new cage
 router.post("/", function(req, res){
 	let new_cage = new cage({
-		Num_cage : req.body.Num_cage,
-		type: req.body.type,
-		couple:req.body.couple,
-		num_oeuf: req.body.num_oeuf
-
+	number:req.body.number,
+	size:req.body.size,
+	couple:req.body.couple,
+	bird:req.body.bird,
+	eggs:req.body.eggs,
+	created:Date.now()
 
 
 	})

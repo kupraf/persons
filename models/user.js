@@ -1,21 +1,62 @@
 'use strict';
-
 var mongoose = require('mongoose');
-
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
- //user
-var userSchema = new Schema({
+var bcrypt = require('bcryptjs');
 
-NomUtilisateur: {type:String, required:true},
-PrenomUtilisateur: {type:String, required:true},
-Date_Naissance: {type:Date},
-Num_tel:{type:Number, required:true},
-Adresse_email:{type:String, required:true},
-Region:{type:String, required:true},
-Mot_de_passe:{type:String, required:true},
-Avatar:{type:String, required:true}
-
+var UserSchema = new Schema({
+  first_name: {
+    type: String,
+    trim: true
+  },
+  last_name: {
+    type: String,
+    trim: true
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  city: {
+    type: String,
+    trim: true
+  },
+  avatar: {
+    type: String,
+    trim: true
+  },
+  created:{
+    type: Date,
+    trim: true
+  },
+  updated:{
+    type: Date,
+    trim: true
+  }
 });
 
-var user =module.exports = mongoose.model('user', userSchema);
+
+//hashing a password before saving
+UserSchema.pre('save', function(next){
+  var user = this;
+    bcrypt.hash(user.password, 10 ,function (err,hash) {
+      if(err){return nes (err);}
+      else{
+          user.password= hash;
+          next();
+      }
+  })
+})
+
+//exporting module
+var User = module.exports = mongoose.model('User', UserSchema);

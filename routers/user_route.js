@@ -1,116 +1,190 @@
 'use strict';
-
 var express = require("express");
 var router = express.Router();
-var user = require('./../models/user.js');
+var User = require('./../models/User.js');
 const async = require('async');
+var randomstring = require("randomstring");
+const transporter = require('./../config/mailer');
+var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+var config = require("./../config/database")
 
 
-// Post new user
-router.post("/", function(req, res, next){
-	let new_user = new user({
-		NomUtilisateur:req.body.NomUtilisateur,
-		PrenomUtilisateur:req.body.PrenomUtilisateur,
-		Date_Naissance:req.body.Date_Naissance,
-		Num_tel:req.body.Num_tel,
-		Adresse_email:req.body.Adresse_email,
-		Region:req.body.Region,
-		Mot_de_passe:req.body.Mot_de_passe,
-		Avatar:req.body.Avatar
+// Post new User
+
+	router.post("/", function(req, res, next){
+		try{
+			async.waterfall([
+				(callback) => {
+					User.findOne({email: req.body.email}, (err, user_exist) => {
+						if (err) {return next(err);}
+						else if (user_exist){
+							res.json({success: false, description: 'post new User', message :'email allrady exist'})
+						}
+						else {
+							callback();
+						}
+					})
+				},
+				(callback) => {
+
+						let new_user = new User({
+						first_name:req.body.first_name,
+						last_name: req.body.last_name,
+						phone:req.body.phone,
+						email:req.body.email,
+						password:req.body.password,
+						city:req.body.city,
+						avatar:req.body.avatar,
+						created: Date.now()
+					})
+					new_user.save(function(err, user){
+					  if (err) {
+					    res.json({success: false, description: "Post new User", message: "User registration failed", error: err})
+					  } else {
+							var mailOptions = {
+									form:'sfc.isgs@gmail.com',
+									to: user.email,
+									subject:'AtAOO, IteliDoc verification E-mail',
+									generateTextFromHTML: true,
+									html:'<p>You have been seleced to join ATAOO app you will</p>'
+
+							};
+							transporter.sendMail(mailOptions, function(error, info){
+								if (error){
+									console.log(error);
+								}else {
+									console.log('email sent:'+info.response);
+								}
+								transporter.close();
+
+							});
+					   callback(null, user)
+					  }
+					})
+				},
+				(err, results) => {
+					 res.json({success: true, description: "Post new User", message: "User registred", data: results})
+				}
+			])
+		} catch (err) {
+			console.error({
+				success: false,
+				description: "Post new user",
+				error: err
+			});
+		}
+
 	})
+	// Authentication
+router.post("/authenticate", (req, res, next) => {
 	try{
 		async.waterfall([
 			(callback) => {
-				User.findOne({email: req.body.email}, (err, user) => {
-					if (err) {return next(err);}
-					else if (user){
-						res.json({success: false, description: 'post new user', message :'email allrady exist'})
-					}
-					else {
-						callback();
+				User.findOne({email: req.body.email}, (err, user_exist) => {
+					if (err) { return next(err);}
+					else if (!user_exist) {
+						res.json({success: false,
+						description: "user authentication",
+						message: "Email not exist"
+					});
+					} else {
+						callback(null, user_exist);
 					}
 				})
 			},
-			(callback) => {
-				new_user.save(function(err, user){
-				  if (err) {
-				    res.json({success: false, description: "Post new user", message: "user registration faled", error: err})
-				  } else {
-				   callback(null, user)
-				  }
+			(user, callback) => {
+				bcrypt.compare(req.body.password, user.password, (err, isMatch) => {
+					if (err) { return next(err);}
+					else if (!isMatch) {
+						res.json({success: false,
+						description: "user authentication",
+						message: "Wrong password"
+					});
+					} else {
+						callback(null, user);
+					}
 				})
-			},
-			(err, results) => {
-				 res.json({success: true, description: "Post new user", message: "user registred", data: results})
 			}
-		])
+		], (err, results) => {
+			const token = jwt.sign(results.toJSON(), config.secret,{
+				expiresIn: 604800 // une semaine
+			})
+			res.json({success: true,
+				description: "user authentication",
+				message: "Welcome again",
+				token: 'JWT' +token,
+				data: results
+			});
+		})
 	} catch (err) {
 		console.error({
 			success: true,
-			description: "Post new user",
+			description: "user authentication",
 			error: err
-		});
+		})
 	}
-
 })
-// Get users
+
+// Get Users
 router.get("/", function(req, res){
-	user.find(function(err, users){
+	User.find(function(err, Users){
 		if (err) {
-			res.json({success: false, description: "Get all users", error: err})
+			res.json({success: false, description: "Get all Users", error: err})
 		} else {
-			res.json({success: true, description: "Get all users", data: users})
+			res.json({success: true, description: "Get all Users", data: Users})
 		}
 	})
 })
-// Get user by id
+// Get User by id
 
 router.get("/:id", function(req, res){
-	users.findOne({_id: req.params.id}, function(err, users){
+	Users.findOne({_id: req.params.id}, function(err, Users){
 		if (err) {
-			res.json({success: false, description: "Get  user", error: err})
+			res.json({success: false, description: "Get  User", error: err})
 		} else {
-			res.json({success: true, description: "Get  user", data: users})
+			res.json({success: true, description: "Get  User", data: Users})
 		}
 	})
 })
-// Delete user by id
+// Delete User by id
 router.delete("/:id", function(req, res){
-	user.remove({_id: req.params.id}, function(err, done){
+	User.remove({_id: req.params.id}, (err, done) => {
 		if (err) {
-			res.json({success: false, description: "Delete user", error: err})
+			res.json({success: false, description: "Delete User", error: err})
 		} else if(!done) {
-			res.json({success: true, description: "Delete user", message: "user not deleted, try again"})
+			res.json({success: true, description: "Delete User", message: "User not deleted, try again"})
 		} else {
-			res.json({success: true, description: "Get new user", message: "user deleted"})
+			res.json({success: true, description: "Get new User", message: "User deleted"})
 		}
 	})
 })
-// Update user / id
+// Update User / id
 router.put("/:id", function(req, res){
-	user.findByIdAndUpdate(req.params.id, {
+	User.findByIdAndUpdate(req.params.id, {
 		$set: {
-			NomUtilisateur:req.body.NomUtilisateur,
-			PrenomUtilisateur:req.body.PrenomUtilisateur,
-			Date_Naissance:req.body.Date_Naissance,
-			Num_tel:req.body.Num_tel,
-			Adresse_email:req.body.Adresse_email,
-			Region:req.body.Region,
-			Mot_de_passe:req.body.Mot_de_passe,
-			Avatar:req.body.Avatar
+			first_name:req.body.first_name,
+			last_name: req.body.last_name,
+			phone:req.body.phone,
+			email:req.body.email,
+			password:req.body.password,
+			city:req.body.city,
+			avatar:req.body.avatar,
+			created:req.body.created,
+			updated:req.body.updated
 
 		}
 	},
 	{
 		new: true
-	}, function(err, user){
+	}, (err, User) =>{
 		if (err) {
-			res.json({success: false, description: "Update user", error: err})
+			res.json({success: false, description: "Update User", error: err})
 		} else {
-			res.json({success: true, description: "Update user", message: "user user", data: user})
+			res.json({success: true, description: "Update User", message: "User User", data: User})
 		}
 	})
 })
 
 // exporting
-module.exports =router ;
+module.exports = router ;

@@ -5,25 +5,31 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 var cageSchema = new Schema({
 
-    Num_cage:{
-           type: Number,
-					 required : true
-		},
-
-	type : {
-		type: String,
-		required: true
-	},
-
-	couple: {
-     type: Schema.Types.ObjectId,
-     ref: 'couple'
-  },
-  num_oeuf: {
+  number:{
     type: Number,
-    required: false
-  }
-
+    required: true
+  },
+  size : {
+    type: String,
+    required: true
+  },
+  couple: {
+    type: Schema.Types.ObjectId,
+    ref: 'Couple'
+  },
+  bird: {
+    type: Schema.Types.ObjectId,
+    ref: 'Bird'
+  },
+  eggs: {
+    type: Number
+  },
+  created:{
+    type: Date
+  },
+  updated:{
+    type: Date
+  },
 
 
 });

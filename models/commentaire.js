@@ -6,23 +6,21 @@ var ObjectId = Schema.ObjectId;
 var commentaireSchema = new Schema({
 
 
-    Contenue:{
-      type : String,
-      required:true
-    },
-    date_com:{
-      type: String,
-      require: Date,
-      default:Date.now()
-    },
-    owner:{
-      type:Schema.Types.ObjectId,
-      ref:'user'
-    },
-    pub:{
-      type:Schema.Types.ObjectId,
-      ref:'publication'
-    }
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  post: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post'
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  created:{
+    type: Date
+  }
 
 
 

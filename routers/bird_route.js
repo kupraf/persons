@@ -5,24 +5,23 @@ var express = require("express");
 var router = express.Router();
 var bird = require('./../models/bird.js');
 const async = require('async');
-
+var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+var config = require("./../config/database");
+var passport = require("passport");
 
 
 // Post new bird mat1
-router.post("/", function(req, res){
+router.post("/", passport.authenticate('JWT', { session: false }), function(req, res){
 	let new_bird = new bird({
-		Num_bague:req.body.Num_bague,
-		Nom:req.body.Nom,
-		category:req.body.category,
-		birth:req.body.birth,
-		death:req.body.death,
-		Description:req.body.Description,
-		Photo:req.body.Photo,
-		parent :req.body.parent,
-		owner:req.body.owner,
-		description:req.body.description
-
-
+		ring: req.body.ring,
+		name: req.body.name,
+		family: req.body.family,
+		birth: req.body.birth,
+		description: req.body.description,
+		Photo: req.body.Photo,
+		parent: req.body.parent,
+		owner: req.user._id
 	})
 	new_bird.save(function(err, bird){
 		if (err) {
@@ -58,7 +57,7 @@ router.get("/", function(req, res){
 	})
 })
 // Get bird by id
-router.get("//:id", function(req, res){
+router.get("/:id", function(req, res){
 	birds.findOne({_id: req.params.id}, function(err, birds){
 		if (err) {
 			res.json({success: false, description: "Get new bird", error: err})
@@ -83,16 +82,13 @@ router.delete("/:id", function(req, res){
 router.put("/:id", function(req, res){
 	bird.findByIdAndUpdate(req.params.id, {
 		$set: {
-			Num_bague:req.body.Num_bague,
-			Nom:req.body.Nom,
-			category:req.body.category,
-			birth:req.body.birth,
-			death:req.body.death,
-			Description:req.body.Description,
-			Photo:req.body.Photo,
-			parent :req.body.parent,
-			owner:req.body.owner,
-			description:req.body.description
+			ring: req.body.ring,
+			name: req.body.name,
+			family: req.body.family,
+			birth: req.body.birth,
+			description: req.body.description,
+			Photo: req.body.Photo,
+			parent: req.body.parent
 		}
 	},
 	{

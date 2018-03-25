@@ -5,25 +5,30 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 var publicationSchema = new Schema({
 
-
-    Contenue:{
-      type : String,
-      required:true
-    },
-    date_pub:{
-      type: String,
-      require: Date,
-      default:Date.now()
-    },
-    owner:{
-      type:Schema.Types.ObjectId,
-      ref:'user'
-    },
-    like:{
-      type:Boolean,
-      default:false
+  content: {
+    type: String
+  },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  likes: [
+    {
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+      }
     }
+  ],
+  photos: [String],
 
+  created:{
+    type: Date
+  },
+  updated:{
+    type: Date
+  }
 
 
 });
