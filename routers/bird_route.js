@@ -7,22 +7,32 @@ var bird = require('./../models/bird.js');
 const async = require('async');
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
-var config = require("./../config/database");
+var config = require('./../config/database');
 var passport = require("passport");
+var multer =require("multer")
+var upload = require('./../config/multerup');
+var multerconf = require('./../config/multerup')
 
 
 // Post new bird mat1
-router.post("/", passport.authenticate('JWT', { session: false }), function(req, res){
+
+router.post("/", passport.authenticate('jwt', { session: false }), multer(multerconf).single('avatar'),(req, res, next) => {
+
+	if (req.file){
+		console.log(req.file);
+		req.body.avatar=req.file.filename;
+	}
 	let new_bird = new bird({
 		ring: req.body.ring,
 		name: req.body.name,
 		family: req.body.family,
 		birth: req.body.birth,
 		description: req.body.description,
-		Photo: req.body.Photo,
+	//	avatar: req.file.avatar,
 		parent: req.body.parent,
 		owner: req.user._id
 	})
+	console.log(file);
 	new_bird.save(function(err, bird){
 		if (err) {
 			res.json({success: false, description: "Post new bird", message: "bird registration faled", error: err})
@@ -30,24 +40,42 @@ router.post("/", passport.authenticate('JWT', { session: false }), function(req,
 			res.json({success: true, description: "Post new bird", message: "bird registred", data: bird})
 		}
 	})
-})
-// Get birds
-router.get("/", function(req, res){
-	bird.find()
-	.select('id_pere id_mere')
-	.populate({
-		path: 'id_pere',
-		module: 'bird',
-		select: 'Num_bague',
-		populate: {
 
+})
+//upload photos
+router.put("/photos", function(req, res){
+	bird.findByIdAndUpdate(req.params.id, {
+		$set: {
+			photos:req.files.photos
+		}
+	},
+	{
+		new: true
+	}, function(err, bird){
+		if (err) {
+			res.json({success: false, description: " photos ajouter", error: err})
+		} else {
+			res.json({success: true, description: "photos ajouter", message: "photo ajouter ", data: bird})
 		}
 	})
-	.populate({
-		path: 'id_mere',
-		module: 'bird',
-		select: 'Num_bague'
-	})
+})
+// Get birds
+router.get("/",passport.authenticate('jwt', { session: false }), function(req, res){console.log(req.user._id)
+	bird.find()
+	// .select('id_pere id_mere')
+	// .populate({
+	// 	path: 'male',
+	// 	module: 'couple',
+	// 	select: 'ring',
+	// 	populate: {
+	//
+	// 	}
+	// })
+	// .populate({
+	// 	path: 'female',
+	// 	module: 'couple',
+	// 	select: 'ring'
+	// })
 	.exec(function(err, birds){
 		if (err) {
 			res.json({success: false, description: "Get new bird", error: err})

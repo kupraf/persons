@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 const async = require('async');
 var config= require('./config/database');
-
+var multer =require('multer')
 var db= require('./config/connection');
 var cors=require('cors');
 var passport = require("passport");
@@ -19,7 +19,7 @@ mongoose.connect('mongodb://ataoo:ataoo@ds012188.mlab.com:12188/ataoo');
 var app = express();
 app.use(passport.initialize());
 app.use(passport.session());
-
+require('./config/passport')(passport);
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 
