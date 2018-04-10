@@ -3,12 +3,12 @@ var express = require("express");
 var router = express.Router();
 var User = require('./../models/User.js');
 const async = require('async');
-var randStr = require("randomstring");
+var randomstring = require("randomstring");
 const transporter = require('./../config/mailer');
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
-var config = require("./../config/database");
-var passport = require("passport");
+var config = require("./../config/database")
+
 
 // Post new User
 
@@ -105,14 +105,6 @@ router.post("/authenticate", (req, res, next) => {
 						callback(null, user);
 					}
 				})
-			},
-			(user, callback) => {
-				req.login(user._id, {session: false}, (err) => {
-						if (err) { return next(err);}
-						else {
-							callback(null, user);
-						}
-				})
 			}
 		], (err, results) => {
 			const token = jwt.sign(results.toJSON(), config.secret,{
@@ -121,7 +113,7 @@ router.post("/authenticate", (req, res, next) => {
 			res.json({success: true,
 				description: "user authentication",
 				message: "Welcome again",
-				token: 'JWT ' +token,
+				token: 'jwt ' +token,
 				data: results
 			});
 		})
@@ -192,14 +184,6 @@ router.put("/:id", function(req, res){
 			res.json({success: true, description: "Update User", message: "User User", data: User})
 		}
 	})
-})
-
-passport.serializeUser((id, done) => {
-	done(null, id)
-})
-
-passport.deserializeUser((id, done) => {
-	done(null, id)
 })
 
 // exporting

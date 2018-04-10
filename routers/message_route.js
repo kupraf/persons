@@ -5,11 +5,12 @@ var express = require("express");
 var router = express.Router();
 var message = require('./../models/message.js');
 const async = require('async');
+var passport = require("passport");
 
 
 
 // Post new message
-router.post("/", function(req, res){
+router.post("/",passport.authenticate('jwt', { session: false }), function(req, res){
 	let new_message = new message({
 		Contenue:req.body.Contenue,
 		vu:req.body.vu,

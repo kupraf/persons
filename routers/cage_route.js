@@ -3,9 +3,11 @@ var express = require("express");
 var router = express.Router();
 var cage = require('./../models/cage.js');
 const async = require('async');
+var jwt = require("jsonwebtoken");
+var passport = require("passport");
 
 // Post new cage
-router.post("/", function(req, res){
+router.post("/", passport.authenticate('jwt', { session: false }),function(req, res){
 	let new_cage = new cage({
 	number:req.body.number,
 	size:req.body.size,
@@ -25,7 +27,9 @@ router.post("/", function(req, res){
 	})
 })
 // Get cages
-router.get("/", function(req, res){
+router.get("/",passport.authenticate('jwt', { session: false }, (error, user, info) => {
+  console.log('error = ', error, ' info = ', info, '  user = ', user);
+}), function(req, res){
 	cage.find(function(err, cages){
 		if (err) {
 			res.json({success: false, description: "Get new cage", error: err})
@@ -35,7 +39,7 @@ router.get("/", function(req, res){
 	})
 })
 // Get cage by id
-router.get("/:Num_cage", function(req, res){
+router.get("/:Num_cage", passport.authenticate('jwt', { session: false }),function(req, res){
 	cages.findOne({Num_cage: req.params.Num_cage}, function(err, cages){
 		if (err) {
 			res.json({success: false, description: "Get new cage", error: err})

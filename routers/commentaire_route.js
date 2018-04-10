@@ -5,11 +5,12 @@ var express = require("express");
 var router = express.Router();
 var commentaire = require('./../models/commentaire.js');
 const async = require('async');
+var passport = require("passport");
 
 
 
 // Post new commentaire
-router.post("/", function(req, res){
+router.post("/",passport.authenticate('jwt', { session: false }), function(req, res){
 	let new_commentaire = new commentaire({
 		user:req.body.user,
 		post:req.body.post,

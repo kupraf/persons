@@ -11,28 +11,28 @@ var config = require('./../config/database');
 var passport = require("passport");
 var multer =require("multer")
 var upload = require('./../config/multerup');
-var multerconf = require('./../config/multerup')
+var multerconf = require('./../config/multerup');
+
 
 
 // Post new bird mat1
 
-router.post("/", passport.authenticate('jwt', { session: false }), multer(multerconf).single('avatar'),(req, res, next) => {
-
-	if (req.file){
-		console.log(req.file);
-		req.body.avatar=req.file.filename;
-	}
+router.post("/",passport.authenticate('jwt', { session: false }),multer(multerconf).single('avatar'),(req, res, next) => {
+	// if (req.file){
+	// 	console.log(req.file);
+	// 	req.body.avatar=req.file.filename;
+	// }
 	let new_bird = new bird({
 		ring: req.body.ring,
 		name: req.body.name,
 		family: req.body.family,
 		birth: req.body.birth,
 		description: req.body.description,
+	  avatar:req.body.avatar=req.file.filename,
 	//	avatar: req.file.avatar,
 		parent: req.body.parent,
 		owner: req.user._id
 	})
-	console.log(file);
 	new_bird.save(function(err, bird){
 		if (err) {
 			res.json({success: false, description: "Post new bird", message: "bird registration faled", error: err})
@@ -60,16 +60,13 @@ router.put("/photos", function(req, res){
 	})
 })
 // Get birds
-router.get("/",passport.authenticate('jwt', { session: false }), function(req, res){console.log(req.user._id)
+router.get("/",passport.authenticate('jwt', { session: false }), function(req, res){
 	bird.find()
-	// .select('id_pere id_mere')
+	// .select('family')
 	// .populate({
-	// 	path: 'male',
-	// 	module: 'couple',
-	// 	select: 'ring',
-	// 	populate: {
-	//
-	// 	}
+	// 	path: 'name',
+	// 	module: 'family',
+	// 	select: 'name',
 	// })
 	// .populate({
 	// 	path: 'female',
@@ -115,8 +112,8 @@ router.put("/:id", function(req, res){
 			family: req.body.family,
 			birth: req.body.birth,
 			description: req.body.description,
-			Photo: req.body.Photo,
-			parent: req.body.parent
+			avatar:req.body.avatar=req.file.filename,
+			owner: req.user._id
 		}
 	},
 	{

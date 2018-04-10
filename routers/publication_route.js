@@ -5,11 +5,20 @@ var express = require("express");
 var router = express.Router();
 var publication = require('./../models/publication.js');
 const async = require('async');
+var multer =require("multer")
+var upload = require('./../config/multerup');
+var multerconf = require('./../config/multerup')
+var passport = require("passport");
+
 
 
 
 // Post new publication
-router.post("/", function(req, res){
+router.post("/", passport.authenticate('jwt', { session: false }),multer(multerconf).array('photos',5),(req, res, next) => {
+	if (req.file){
+		console.log(req.file);
+		req.body.photos=req.file.filename;
+	}
 	let new_publication = new publication({
 	content:req.body.content,
 	user:req.body.user,

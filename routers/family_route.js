@@ -3,15 +3,24 @@ var express = require("express");
 var router = express.Router();
 var family = require('./../models/family.js');
 const async = require('async');
+var multer =require("multer")
+var upload = require('./../config/multerup');
+var multerconf = require('./../config/multerup')
+var passport = require("passport");
+
 
 // Post new family
-router.post("/", function(req, res){
+router.post("/",passport.authenticate('jwt', { session: false }), multer(multerconf).array('photos',5),(req, res, next) => {
+	if (req.file){
+		console.log(req.file);
+		req.body.photos=req.file.filename;
+	}
 	let new_family = new family({
-		//parent:req.body.parent,
-		name:req.body.name,
-		description:req.body.description,
-	//	photos:req.body.photos,
-		created:Date.now()
+	parent:req.body.parent,
+	name:req.body.name,
+	description:req.body.description,
+	photos:req.body.photos=req.file.filename,
+	created:Date.now()
 	})
 	new_family.save(function(err, family){
 		if (err) {
@@ -22,7 +31,7 @@ router.post("/", function(req, res){
 	})
 })
 // Get familys
-router.get("/", function(req, res){
+router.get("/",passport.authenticate('jwt', { session: false }),function(req, res){
 	family.find(function(err, familys){
 		if (err) {
 			res.json({success: false, description: "Get new family", error: err})
@@ -32,7 +41,7 @@ router.get("/", function(req, res){
 	})
 })
 // Get family by id
-router.get("/:Num_family", function(req, res){
+router.get("/:Num_family",passport.authenticate('jwt', { session: false }),function(req, res){
 	familys.findOne({Num_family: req.params.Num_family}, function(err, familys){
 		if (err) {
 			res.json({success: false, description: "Get new family", error: err})

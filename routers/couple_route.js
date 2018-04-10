@@ -3,9 +3,10 @@ var express = require("express");
 var router = express.Router();
 var couple = require('./../models/couple.js');
 const async = require('async');
+var passport = require("passport");
 
 // Post new couple
-router.post("/", function(req, res){
+router.post("/",passport.authenticate('jwt', { session: false }), function(req, res){
 	let new_couple = new couple({
 		name:req.body.name,
 		male:req.body.male,
