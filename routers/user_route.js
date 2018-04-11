@@ -13,6 +13,7 @@ var config = require("./../config/database")
 // Post new User
 
 	router.post("/", function(req, res, next){
+//email verification
 		try{
 			async.waterfall([
 				(callback) => {
@@ -42,6 +43,7 @@ var config = require("./../config/database")
 					  if (err) {
 					    res.json({success: false, description: "Post new User", message: "User registration failed", error: err})
 					  } else {
+							//mail config
 							var mailOptions = {
 									form:'sfc.isgs@gmail.com',
 									to: user.email,
@@ -125,6 +127,15 @@ router.post("/authenticate", (req, res, next) => {
 		})
 	}
 })
+// authenticate facebook
+// router.get('/login_facebook',
+//   passport.authenticate('facebook'));
+//
+// router.get('/auth/facebook/callback',
+//   passport.authenticate('facebook', { session :false }),
+//   function(req, res) {
+//     res.send('AUTH WAS GOOD!')
+//   });
 
 // Get Users
 router.get("/", function(req, res){

@@ -9,6 +9,8 @@ var multer =require('multer')
 var db= require('./config/connection');
 var cors=require('cors');
 var passport = require("passport");
+var passport_facebook= require('passport-facebook')
+var FacebookStrategy = require ('passport-facebook');
 
  // import
 mongoose.connect('mongodb://ataoo:ataoo@ds012188.mlab.com:12188/ataoo');
@@ -20,6 +22,28 @@ var app = express();
 app.use(passport.initialize());
 app.use(passport.session());
 require('./config/passport')(passport);
+require('./config/passport_facebook')(passport_facebook);
+passport.use(new FacebookStrategy({
+	clientID: '590969441262591',
+	clientSecret: 'd5182c7c7d05815b49438a49b89b0a32',
+	callbackURL: "https://localhost:8081/auth/facebook/callback"
+},
+function(accessToken, refreshToken, profile, cb) {
+	console.log(profile);
+	cb(null, profile);
+
+}
+));
+app.get('/flogin',
+  passport.authenticate('facebook'));
+
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { session :false }),
+  function(req, res) {
+		console.log(profile);
+    res.send('AUTH WAS GOOD!')
+  });
+
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 
